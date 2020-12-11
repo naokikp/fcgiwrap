@@ -83,7 +83,7 @@ static const char * blacklisted_env_vars[] = {
 };
 
 static int stderr_to_fastcgi = 0;
-
+static int no_buffering = 0;
 
 #define FCGI_BUF_SIZE 4096
 
@@ -256,6 +256,7 @@ out_of_loop:
 				return "writing CGI reply";
 			}
 		}
+		if(no_buffering) FCGI_fflush(ffp);
 	} else {
 		if (nread < 0) {
 			return "reading CGI reply";
@@ -806,8 +807,11 @@ int main(int argc, char **argv)
 	int fd = 0;
 	int c;
 
-	while ((c = getopt(argc, argv, "c:hfs:p:")) != -1) {
+	while ((c = getopt(argc, argv, "c:bhfs:p:")) != -1) {
 		switch (c) {
+			case 'b':
+				no_buffering++;
+				break;
 			case 'f':
 				stderr_to_fastcgi++;
 				break;
